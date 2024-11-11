@@ -15,6 +15,7 @@ endef
 
 define WYZE_ACCESSORY_INSTALL_TARGET_CMDS_FLOODLIGHT
 	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/modules.d
+	$(INSTALL) -m 0755 -D $(WYZE_ACCESSORY_PKGDIR)/files/floodlight_ctl $(TARGET_DIR)/usr/sbin/floodlight_ctl
 	echo ch341 >> $(TARGET_DIR)/etc/modules.d/accessory
 	echo snd-usb-audio >> $(TARGET_DIR)/etc/modules.d/accessory
 endef
