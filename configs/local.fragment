@@ -1,1 +1,2 @@
 # place your custom settings for local build here
+BR2_PACKAGE_WYZE_ACCESSORY_FLOODLIGHT=y
