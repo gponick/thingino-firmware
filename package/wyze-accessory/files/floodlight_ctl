@@ -1,0 +1,65 @@
+#!/bin/sh
+# This script is used to control the floodlight on the camera
+
+# This function takes a brightness percentage as an argument and returns the command string to set the brightness of the floodlight
+get_floodlight_command_string() {
+	initial_total=405
+	brightness_pct=$1
+	brightness_hex=$(printf "%02x" $((255*brightness_pct/100)))
+	#echo "brightness_hex: ${brightness_hex}"
+	brightness_dec=$((255*brightness_pct/100))
+	sequence_start="\xaa\x55\x43\x06\x46"
+	brightness_sequence="\x${brightness_hex}\x00\x07"
+	combined_sequence="${sequence_start}${brightness_sequence}"
+	# add brightness_dec and initial_total and print it as a 2 byte hex value in the format \x##\x##
+	check_bytes_raw=$(printf "%.4x" $((${brightness_dec} + ${initial_total})))
+	#echo "check_bytes_raw: ${check_bytes_raw}"
+	# get the first 2 bytes of the check_bytes_raw using awk
+	first_two_chars=$(echo $check_bytes_raw | awk '{print substr($0, 1, 2)}')
+	# get the last 2 bytes of the check_bytes_raw using awk
+	last_two_chars=$(echo $check_bytes_raw | awk '{print substr($0, 3, 2)}')
+	# combine the first and last 2 bytes into a single string
+	check_bytes="\x${first_two_chars}\x${last_two_chars}"
+	echo -n "${combined_sequence}${check_bytes}"
+}
+
+# if there is no argument, print help
+help() {
+	echo "usage: floodlight_ct <% value: 0-100>"
+	echo "usage: spotlight_ctl max"
+	echo "usage: spotlight_ctl off"
+}
+
+# if the script is run with no args, display help
+if [ $# -eq 0 ]; then
+	help
+	exit 1
+fi
+
+# if the first arg isn't an integer that is >= 0 and <= 100, and it's not max or off display help and exit
+if [[ "$1" != "off" && "$1" != "max" ]]; then
+    if [[ ! "$1" =~ ^[0-9]+$ ]] || [ "$1" -lt 0 ] || [ "$1" -gt 100 ]; then
+        help
+        exit 1
+    fi
+fi
+
+case "$1" in
+	"max")
+		brightness_pct=100
+		brightness_string=$(get_floodlight_command_string $brightness_pct)
+        echo "Setting brightness to max: [${brightness_string}]"
+		echo -ne "${brightness_string}" > /dev/ttyUSB0
+		;;
+	"off")
+		brightness_pct=0
+		brightness_string=$(get_floodlight_command_string $brightness_pct)
+        echo "Setting brightness to off: [${brightness_string}]"
+		echo -ne "${brightness_string}" > /dev/ttyUSB0
+		;;
+	*)
+		brightness_string=$(get_floodlight_command_string $1)
+        echo "Setting brightness to $1: [${brightness_string}]"
+		echo -ne "${brightness_string}" > /dev/ttyUSB0
+		;;
+esac
