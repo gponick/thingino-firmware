@@ -10,7 +10,7 @@ Shortcuts:
 fi
 
 case "$1" in
-	%ip)	phrase="IP address is $(ip r | sed -nE "/wlan0/s/.+src ([0-9\.]+).+?/\1/p" | uniq)" ;;
+	%ip)	phrase="IP address is $(ip r | grep -E 'wlan0|eth0' | grep src | awk '{ print $7 " for interface " $3 }')" ;;
 	%time)	phrase="$(date)" ;;
 	*)	phrase="$*" ;;
 esac
