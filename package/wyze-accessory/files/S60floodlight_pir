@@ -1,0 +1,32 @@
+#!/bin/sh
+
+DAEMON_ARGS="--pir-off --daemon"
+
+. /etc/init.d/rc.common
+
+start() {
+	starting
+	[ -f $DAEMON_FULL ] || quit "Disabled"
+	start-stop-daemon -S -q -p /var/run/floodlight_pir.pid -b -m -x /usr/sbin/floodlight_pir -- $DAEMON_ARGS
+}
+
+stop() {
+	stopping
+	[ -f $DAEMON_FULL ] || quit "Disabled"
+	start-stop-daemon -K -p /var/run/floodlight_pir.pid --remove-pidfile
+}
+
+case "$1" in
+	start | stop)
+		$1
+		;;
+	reload | restart)
+		stop
+		start
+		;;
+	*)
+		die "Usage: $0 {start|stop|restart}"
+		;;
+esac
+
+exit 0

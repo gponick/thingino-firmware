@@ -1,0 +1,38 @@
+#!/bin/sh
+
+. /etc/init.d/rc.common
+
+start() {
+	starting
+	[ -f $DAEMON_FULL ] || quit "Disabled"
+	# if /var/run/floodlight.status doesn't exist set it to OFF
+	if [ ! -f /var/run/floodlight.status ]; then
+		echo "OFF" > /var/run/floodlight.status
+	fi
+	# if /var/run/floodlight.brightness doesn't exist set it to 40
+	if [ ! -f /var/run/floodlight.brightness ]; then
+		echo "40" > /var/run/floodlight.brightness
+	fi
+	start-stop-daemon -S -q -p /var/run/floodlight_ctl_d.pid -b -m -x /usr/sbin/floodlight_ctl_d
+}
+
+stop() {
+	stopping
+	[ -f $DAEMON_FULL ] || quit "Disabled"
+	start-stop-daemon -K -p /var/run/floodlight_ctl_d.pid --remove-pidfile
+}
+
+case "$1" in
+	start | stop)
+		$1
+		;;
+	reload | restart)
+		stop
+		start
+		;;
+	*)
+		die "Usage: $0 {start|stop|restart}"
+		;;
+esac
+
+exit 0
