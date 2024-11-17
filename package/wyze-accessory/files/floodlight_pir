@@ -1,0 +1,56 @@
+#!/bin/sh
+
+PIR_OFF_STRING="\xaa\x55\x43\x06\x5a\x5b\xe0\x02\x02\xdf"
+
+device="/dev/ttyUSB0"
+
+usage() {
+    echo "Usage: $0 --pir-off --daemon"
+    echo ""
+    echo "Options:"
+    echo "  --pir-off: Send the PIR off string to the DEVICE device (default: /dev/ttyUSB0)"
+    echo "  --daemon: Run the script as a daemon, if not run once and exit"
+    exit 1
+}
+
+set_pir_off() {
+    echo "Sending PIR off string"
+    echo -ne "$PIR_OFF_STRING" > $device
+    echo 1 > /var/run/floodlight_pir
+}
+
+if [ $# -eq 0 ]; then
+    echo "Missing arguments"
+    usage
+fi
+
+# sh for loop over all the passed in argments
+for i in "$@"; do
+    case $i in
+        --pir-off)
+            PIR_OFF=1
+            ;;
+        --daemon)
+            DAEMON=1
+            ;;
+        *)
+            echo "Invalid argument: $i"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# if DAEMON is 1
+if [ "$DAEMON" == "1" ]; then
+    while true; do
+        # if PIR_OFF is 1, set the PIR off
+        if [ "$PIR_OFF" == "1" ]; then
+            set_pir_off
+        fi
+        sleep 30
+    done
+fi
+
+set_pir_off
+exit 0

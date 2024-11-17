@@ -15,6 +15,10 @@ endef
 
 define WYZE_ACCESSORY_INSTALL_TARGET_CMDS_FLOODLIGHT
 	$(INSTALL) -m 755 -D $(WYZE_ACCESSORY_PKGDIR)/files/floodlight_ctl $(TARGET_DIR)/usr/sbin/floodlight_ctl
+	$(INSTALL) -m 755 -D $(WYZE_ACCESSORY_PKGDIR)/files/floodlight_ctl_d $(TARGET_DIR)/usr/sbin/floodlight_ctl_d
+	$(INSTALL) -m 755 -D $(WYZE_ACCESSORY_PKGDIR)/files/floodlight_pir $(TARGET_DIR)/usr/sbin/floodlight_pir
+	$(INSTALL) -m 755 -D $(WYZE_ACCESSORY_PKGDIR)/files/S60floodlight_pir $(TARGET_DIR)/etc/init.d/S60floodlight_pir
+	$(INSTALL) -m 755 -D $(WYZE_ACCESSORY_PKGDIR)/files/S61floodlight_ctl_d $(TARGET_DIR)/etc/init.d/S61floodlight_ctl_d
 	$(INSTALL) -m 755 -d $(TARGET_DIR)/etc/modules.d
 	echo ch341 >> $(TARGET_DIR)/etc/modules.d/accessory
 	echo snd-usb-audio >> $(TARGET_DIR)/etc/modules.d/accessory
